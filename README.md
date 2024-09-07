@@ -65,15 +65,14 @@ More research is planned in this area, but my next primary focus, now that basic
 
 ## Error Handling
 
-Since Odin doesn't exactly have strong opinions on error handling, Bang uses its own logging and error propagation logic. It's roughly inspired by Go's errors as values approach.
-
-It includes a debug_log procedure that just takes in a string and logs the calling location along with whatever you specified.
+Since Odin doesn't exactly have strong opinions on error handling, Bang uses its own error propagation logic. It's roughly inspired by Go's errors as values approach.
 
 It also includes three procedures called 'error', 'good', and 'ok'.
 
 Use them like so, but hopefully without the unfortunate abuse of nil:
 
 ```
+import "core:log"
 import b"path/to/bang"
 
 danger_boy :: proc(nilly:^string) -> (^string, b.Error) {
@@ -87,10 +86,10 @@ main :: proc() {
     bad: ^string = nil
     nilly, err := danger_boy(bad)
     if !b.ok(err) {
-        b.debug_log("danger boy failed!")
+        log.debug("danger boy failed!")
         return
     } 
-    b.debug_log(fmt.tprint("danger boy found ", nilly))
+    log.debug("danger boy found ", nilly)
 }
 ```
 

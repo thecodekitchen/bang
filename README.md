@@ -74,18 +74,22 @@ It also includes three procedures called 'error', 'good', and 'ok'.
 Use them like so, but hopefully without the unfortunate abuse of nil:
 
 ```
-danger_boy :: proc(nilly:^string) -> (^string, Error) {
+import b"path/to/bang"
+
+danger_boy :: proc(nilly:^string) -> (^string, b.Error) {
     if nilly == nil {
-        return nil,error("nilly be nillin")
+        return nil, b.error("nilly be nillin")
     }
-    return nilly, good()
+    return nilly, b.good()
 }
 
 main :: proc() {
     nilly, err := danger_boy(nil)
-    if !ok(err) {
-        fmt.println(nilly)
-    }
+    if !b.ok(err) {
+        b.debug_log("danger boy failed!")
+        return
+    } 
+    b.debug_log(fmt.tprint("danger boy found ", nilly))
 }
 ```
 

@@ -2,6 +2,7 @@ package bang
 
 import "core:slice"
 import "core:fmt"
+import "core:log"
 import "core:time"
 import glfw"vendor:glfw"
 
@@ -44,10 +45,10 @@ CustomComponent :: struct {
 
 add_component_to_scene :: proc(sg: ^SceneGraph,  component: ^Component) -> Error {
     if sg == nil {
-        return error("^SceneGraph was nil", .NilPtr)
+        return error(.NilPtr, "^SceneGraph was nil")
     }
     if component == nil {
-        return error("^Component was nil", .NilPtr)
+        return error(.NilPtr, "^Component was nil")
     }
     
     append(&sg.Components[component.ctype], component)
@@ -64,7 +65,7 @@ add_entity_to_scene :: proc(sg: ^SceneGraph, components: [](^Component)) -> (Ent
         err := add_component_to_scene(sg, c)
         if !ok(err) {
             message := fmt.tprintf("failed to add component to scene: %s", c)
-            error(message, err.t)
+            error(err.t, message)
             return 0, err
         }
     }

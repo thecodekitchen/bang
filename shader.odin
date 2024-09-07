@@ -17,7 +17,7 @@ load_basic_shader_program :: proc() -> (u32, Error) {
     gl.CompileShader(vertex_shader)
     err := check_shader_compilation(vertex_shader, "vertex")
     if !ok(err) {
-        return 0, error("Failed to compile vertex shader", err.t)
+        return 0, error(err.t, "Failed to compile vertex shader")
     }
 
     fragment_shader := gl.CreateShader(gl.FRAGMENT_SHADER)
@@ -25,7 +25,7 @@ load_basic_shader_program :: proc() -> (u32, Error) {
     gl.CompileShader(fragment_shader)
     err = check_shader_compilation(fragment_shader, "fragment")
     if !ok(err) {
-        return 0, error("Failed to compile fragment shader", err.t)
+        return 0, error(err.t, "Failed to compile fragment shader")
     }
 
     gl.AttachShader(shader_program, vertex_shader)
@@ -49,7 +49,7 @@ load_advanced_shader_program :: proc() -> (program: u32, err: Error) {
     gl.ShaderSource(vertex_shader, 1, &vertex_src, nil)
     gl.CompileShader(vertex_shader)
     if err = check_shader_compilation(vertex_shader, "Vertex"); !ok(err) {
-        return 0, error("Failed to compile vertex shader", err.t)
+        return 0, error(err.t, "Failed to compile vertex shader")
     }
 
     fragment_shader := gl.CreateShader(gl.FRAGMENT_SHADER)
@@ -57,7 +57,7 @@ load_advanced_shader_program :: proc() -> (program: u32, err: Error) {
     gl.ShaderSource(fragment_shader, 1, &fragment_src, nil)
     gl.CompileShader(fragment_shader)
     if err = check_shader_compilation(fragment_shader, "Fragment"); !ok(err) {
-        return 0, error("Failed to compile fragment shader", err.t)
+        return 0, error(err.t, "Failed to compile fragment shader")
     }
 
     gl.AttachShader(program, vertex_shader)
@@ -65,11 +65,11 @@ load_advanced_shader_program :: proc() -> (program: u32, err: Error) {
 
     gl.LinkProgram(program)
     if err = check_program_linking(program); !ok(err) {
-        return 0, error("Failed to link shader program", err.t)
+        return 0, error(err.t, "Failed to link shader program")
     }
 
     if err = validate_program(program); !ok(err) {
-        return 0, error("Shader program validation failed", err.t)
+        return 0, error(err.t, "Shader program validation failed")
     }
 
     return program, good()
@@ -82,7 +82,7 @@ check_shader_compilation :: proc(shader: u32, shader_type: string) -> Error {
         info_log: [512]u8
         gl.GetShaderInfoLog(shader, 512, nil, &info_log[0])
         m := fmt.tprintf("%s shader compilation failed: %s", shader_type, string(info_log[:]))
-        return error(m, .GL)
+        return error(.GL, m)
     }
     return good()
 }
@@ -94,7 +94,7 @@ check_program_linking :: proc(program: u32) -> Error {
         info_log: [512]u8
         gl.GetProgramInfoLog(program, 512, nil, &info_log[0])
         m := fmt.tprintf("Shader program linking failed: %s", string(info_log[:]))
-        return error(m, .GL)
+        return error(.GL, m)
     }
     return good()
 }
@@ -107,7 +107,7 @@ validate_program :: proc(program: u32) -> Error {
         info_log: [512]u8
         gl.GetProgramInfoLog(program, 512, nil, &info_log[0])
         m := fmt.tprintf("Shader program validation failed: %s", string(info_log[:]))
-        return error(m, .GL)
+        return error(.GL, m)
     }
     return good()
 }
@@ -127,7 +127,7 @@ set_uniform :: proc(location: i32, value: $T) -> Error {
     }
     
     if err := gl.GetError(); err != gl.NO_ERROR {
-        return error(fmt.tprintf("OpenGL error setting uniform: %v", err), .GL)
+        return error(.GL, "OpenGL error setting uniform: %v", err)
     }
     return good()
 }

@@ -1,5 +1,6 @@
 package bang
 import "core:fmt"
+import "core:log"
 import "base:runtime"
 
 ErrorType :: enum {
@@ -14,29 +15,26 @@ Error :: struct {
     message: string
 }
 
-debug_log :: proc(message: string, location := #caller_location) {
-    fmt.printf("[%s:%d] %s\n", location.file_path, location.line, message)
-}
 
 // Wrapper function to get caller's caller location
 error_log :: proc(message: string, t: ErrorType, location: runtime.Source_Code_Location) {
     fmt.printf("ERROR: %s at [%s:%d] %s\n", t, location.file_path, location.line, message)
 }
 
-error :: proc(message: string, etype: ErrorType, location := #caller_location) -> Error {
+error :: proc(etype: ErrorType, message: ..any) -> Error {
     if etype != .None {
-        error_log(message, etype, location)
+        log.error(message)
     }
     
     error := Error {
         t = etype,
-        message = message
+        message = fmt.tprint(message)
     }
     return error
 }
 
 good :: proc() -> Error {
-    return error("", .None)
+    return error(.None, "")
 }
 
 ok :: proc(err: Error) -> bool {

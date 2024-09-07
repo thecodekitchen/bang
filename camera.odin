@@ -25,7 +25,7 @@ update_cameras :: proc(sg: ^SceneGraph) -> Error {
         err := update_view_matrix(sg, cam)
         if !ok(err) {
             message := fmt.tprintf("failed to update view matrix for camera with eid %d", cam.eid)
-            return error(message, err.t)
+            return error(err.t, message)
         }
     }
     return good()
@@ -37,12 +37,12 @@ update_view_matrix :: proc(sg: ^SceneGraph, camera: ^Camera) -> Error {
     transform := get_transform(sg, camera.eid)
     if transform == nil {
         m :=fmt.tprintf("failed to get transform for camera with eid %d", camera.eid)
-        return error(m, .NilPtr)
+        return error(.NilPtr, m)
     }    
     view_matrix, err := get_view_matrix(transform)
     if !ok(err) {
         m := fmt.tprintf("transform was nil for camera with eid %d", camera.eid)
-        return error(m, err.t)
+        return error(err.t, m)
     }
     camera.view_matrix = view_matrix
     if camera.is_main{
@@ -74,7 +74,7 @@ get_main_camera_transform :: proc(sg: ^SceneGraph) -> ^Transform {
 
 get_view_matrix :: proc(t:^Transform) -> (linalg.Matrix4f32, Error) {
     if t == nil {
-        return linalg.MATRIX4F32_IDENTITY, error("transform was nil", .NilPtr)
+        return linalg.MATRIX4F32_IDENTITY, error(.NilPtr, "transform was nil")
     }
     target := t.position + t.front
     return linalg.matrix4_look_at_f32(t.position, target, t.up), good()
@@ -88,7 +88,7 @@ build_camera :: proc(sg: ^SceneGraph,transform: ^Transform, is_main: bool) -> (C
     view_matrix, err := get_view_matrix(transform)
     if !ok(err) {
         m := fmt.tprintf("transform was nil for camera with eid %d", camera.eid)
-        return camera, error(m, err.t)
+        return camera, error(err.t, m)
     }
 
     camera.view_matrix = view_matrix

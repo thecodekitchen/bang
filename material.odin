@@ -13,7 +13,7 @@ Material :: struct {
 build_basic_material :: proc() -> (Material, Error) {
     program, err := load_basic_shader_program()
     if !ok(err) {
-        return Material{}, error("Failed to load basic shader program", err.t)
+        return Material{}, error(err.t, "Failed to load basic shader program")
     }
     material := Material {
         ctype = .Material,
@@ -31,7 +31,7 @@ build_basic_material :: proc() -> (Material, Error) {
 build_advanced_material :: proc(data: MaterialData) -> (Material, Error) {
     program, err := load_advanced_shader_program()
     if !ok(err) {
-        return Material{}, error("Failed to load advanced shader program", err.t)
+        return Material{}, error(err.t, "Failed to load advanced shader program")
     }
     
     material := Material {
@@ -58,7 +58,7 @@ build_advanced_material :: proc(data: MaterialData) -> (Material, Error) {
             uniform_name := fmt.tprintf("%s.%s", light_base, lu)
             location := gl.GetUniformLocation(program, cstring(raw_data(uniform_name)))
             if location == -1 {
-                return Material{}, error(fmt.tprintf("Failed to get location for uniform: %s", uniform_name), .GL)
+                return Material{}, error(.GL, "Failed to get location for uniform", uniform_name)
             }
             material.shader_var_locs[uniform_name] = location
         }

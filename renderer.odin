@@ -29,11 +29,11 @@ render_scene :: proc(sg: ^SceneGraph, window: glfw.WindowHandle) -> Error {
     
     main_cam := get_main_camera(sg)
     if main_cam == nil {
-        return error("failed to get main camera", .NilPtr)
+        return error(.NilPtr, "failed to get main camera")
     }
     err := render_objects(sg, &projection, main_cam, window)
     if !ok(err) {
-        return error("failed to render objects", err.t)
+        return error(err.t, "failed to render objects")
     }
     clear_input_manager(sg.InputManager)
     return good()
@@ -51,15 +51,15 @@ render_objects :: proc(sg: ^SceneGraph, projection: ^matrix[4,4]f32, main_cam: ^
         material := get_material(sg, e)
         if mesh == nil {
             m := fmt.tprintf("mesh not found for entity %d", e)
-            return error(m, .NilPtr)
+            return error(.NilPtr, m)
         } 
         if material == nil {
             m := fmt.tprintf("material not found for entity %d", e)
-            return error(m, .NilPtr)
+            return error(.NilPtr, m)
         }
         err := render_advanced_material(sg, material, &model, &view, projection)
         if  !ok(err) {
-            return error("failed to render advanced material", err.t)
+            return error(err.t, "failed to render advanced material")
         }
 
         gl.BindVertexArray(mesh.vao)
@@ -73,34 +73,34 @@ render_basic_material :: proc(material: ^Material, model, view, projection: ^mat
     gl.UseProgram(material.shader_program)
     if err := gl.GetError(); err != gl.NO_ERROR {
         m := fmt.tprintf("OpenGL error using shader program: %v\n", err)
-        return error(m, .GL)
+        return error(.GL, m )
     }
     gl.UniformMatrix4fv(material.shader_var_locs["model"], 1, gl.FALSE, &model[0, 0])
     if err := gl.GetError(); err != gl.NO_ERROR {
         m := fmt.tprintf("OpenGL error setting model matrix: %v\n", err)
-        return error(m, .GL)
+        return error(.GL, m )
     }
     gl.UniformMatrix4fv(material.shader_var_locs["view"], 1, gl.FALSE, &view[0,0])
     if err := gl.GetError(); err != gl.NO_ERROR {
         m := fmt.tprintf("OpenGL error setting view matrix: %v\n", err)
-        return error(m, .GL)
+        return error(.GL, m )
     }
     gl.UniformMatrix4fv(material.shader_var_locs["projection"], 1, gl.FALSE, &projection[0,0])
     if err := gl.GetError(); err != gl.NO_ERROR {
         m := fmt.tprintf("OpenGL error setting projection matrix: %v\n", err)
-        return error(m, .GL)
+        return error(.GL, m )
     }
     return good()
 }
 
 render_advanced_material :: proc(sg: ^SceneGraph, material: ^Material, model, view, projection: ^matrix[4,4]f32) -> Error {
     if material.props == nil {
-        return error("material props not set", .InvalidType)
+        return error(.InvalidType, "material props not set")
     }
     
     gl.UseProgram(material.shader_program)
     if err := gl.GetError(); err != gl.NO_ERROR {
-        return error(fmt.tprintf("OpenGL error using shader program: %v", err), .GL)
+        return error(.GL, "OpenGL error using shader program: %v", err)
     }
     
     ambient := material.props.?.ambient
@@ -110,7 +110,7 @@ render_advanced_material :: proc(sg: ^SceneGraph, material: ^Material, model, vi
     
     cam_transform := get_main_camera_transform(sg)
     if cam_transform == nil {
-        return error("Failed to get main camera transform", .NilPtr)
+        return error(.NilPtr, "Failed to get main camera transform")
     }
     view_pos := cam_transform.position
     
@@ -122,18 +122,18 @@ render_advanced_material :: proc(sg: ^SceneGraph, material: ^Material, model, vi
     num_lights := len(lights)
     
     // Set uniforms
-    if err := set_uniform(material.shader_var_locs["model"], model^); !ok(err) do return error("error setting model uniform", err.t)
-    if err := set_uniform(material.shader_var_locs["view"], view^); !ok(err) do return error("error setting view uniform", err.t)
-    if err := set_uniform(material.shader_var_locs["projection"], projection^); !ok(err) do return error("error setting projection uniform", err.t)
-    if err := set_uniform(material.shader_var_locs["viewPos"], view_pos); !ok(err) do return error("error setting viewPos uniform", err.t)
-    if err := set_uniform(material.shader_var_locs["diffuseColor"], diffuse); !ok(err) do return error("error setting diffuseColor uniform", err.t)
-    if err := set_uniform(material.shader_var_locs["specularColor"], specular); !ok(err) do return error("error setting specularColor uniform", err.t)
-    if err := set_uniform(material.shader_var_locs["shininess"], shininess); !ok(err) do return error("error setting shininess uniform", err.t)
+    if err := set_uniform(material.shader_var_locs["model"], model^); !ok(err) do return error(err.t, "error setting model uniform")
+    if err := set_uniform(material.shader_var_locs["view"], view^); !ok(err) do return error(err.t, "error setting view uniform")
+    if err := set_uniform(material.shader_var_locs["projection"], projection^); !ok(err) do return error(err.t, "error setting projection uniform")
+    if err := set_uniform(material.shader_var_locs["viewPos"], view_pos); !ok(err) do return error(err.t, "error setting viewPos uniform")
+    if err := set_uniform(material.shader_var_locs["diffuseColor"], diffuse); !ok(err) do return error(err.t, "error setting diffuseColor uniform")
+    if err := set_uniform(material.shader_var_locs["specularColor"], specular); !ok(err) do return error(err.t, "error setting specularColor uniform")
+    if err := set_uniform(material.shader_var_locs["shininess"], shininess); !ok(err) do return error(err.t, "error setting shininess uniform")
     
     // Set light uniforms
     gl.Uniform1i(material.shader_var_locs["numLights"], i32(num_lights))
     if err := gl.GetError(); err != gl.NO_ERROR {
-        return error(fmt.tprintf("OpenGL error setting numLights uniform: %v", err), .GL)
+        return error(.GL, "OpenGL error setting numLights uniform: %v", err)
     }
 
     for l, i in lights {
@@ -146,14 +146,14 @@ render_advanced_material :: proc(sg: ^SceneGraph, material: ^Material, model, vi
         //            i, position_loc, color_loc, intensity_loc)
         
         if position_loc == -1 || color_loc == -1 || intensity_loc == -1 {
-            return error(fmt.tprintf("Invalid uniform location for light %d", i), .GL)
+            return error(.GL, "Invalid uniform location for light %d", i)
         }
         
         // fmt.printf("Light %d: position = %v, color = %v, intensity = %f\n", 
         //            i, lights[i].position, lights[i].color, lights[i].intensity)
-        if err := set_uniform(material.shader_var_locs[fmt.tprintf("%s.position", light_base)], l.position); !ok(err) do return error("error setting light position uniform", err.t)
-        if err := set_uniform(material.shader_var_locs[fmt.tprintf("%s.color", light_base)], l.color); !ok(err) do return error("error setting light color uniform", err.t)
-        if err := set_uniform(material.shader_var_locs[fmt.tprintf("%s.intensity", light_base)], l.intensity); !ok(err) do return error("error setting light intensity uniform", err.t)
+        if err := set_uniform(material.shader_var_locs[fmt.tprintf("%s.position", light_base)], l.position); !ok(err) do return error(err.t, "error setting light position uniform")
+        if err := set_uniform(material.shader_var_locs[fmt.tprintf("%s.color", light_base)], l.color); !ok(err) do return error(err.t, "error setting light color uniform")
+        if err := set_uniform(material.shader_var_locs[fmt.tprintf("%s.intensity", light_base)], l.intensity); !ok(err) do return error(err.t, "error setting light intensity uniform")
     }
     
     return good()

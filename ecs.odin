@@ -7,7 +7,7 @@ import "core:time"
 import glfw"vendor:glfw"
 
 EntityID :: distinct u64
-System :: proc(^SceneGraph) -> Error
+System :: proc(sg:^SceneGraph) -> Error
 CUSTOM_START :: 500
 SceneGraph :: struct {
     Width: i32,
@@ -18,7 +18,8 @@ SceneGraph :: struct {
     Entities: [dynamic]EntityID,
     Components: #sparse [ComponentType][dynamic]^Component,
     CustomComponents: map[string]u64,
-    Systems: map[string]System
+    Systems: map[string]System,
+    Forces: [dynamic]Force
 }
 
 Component :: struct {
@@ -33,6 +34,7 @@ ComponentType :: enum {
     Transform,
     Camera,
     Light,
+    RigidBody,
     Custom_Start = CUSTOM_START
     // custom component ids will start at 501
 }

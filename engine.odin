@@ -4,6 +4,7 @@ import gl "vendor:OpenGL"
 import glfw "vendor:glfw"
 import "core:fmt"
 import "core:time"
+import "core:log"
 create_bang_window :: proc() -> (glfw.WindowHandle, i32, i32) {
     if !glfw.Init() {
         fmt.println("Failed to initialize GLFW")
@@ -34,7 +35,10 @@ create_scene :: proc() -> (glfw.WindowHandle, SceneGraph) {
     sg := SceneGraph{
         Width = width,
         Height = height,
-        InputManager = init_input_manager()
+        InputManager = init_input_manager(),
+        Systems = map[string]System{
+            "gravity" = gravity_system,
+        },
     }
     return window, sg
 }
@@ -69,6 +73,9 @@ run_scene :: proc(window: glfw.WindowHandle, sg: ^SceneGraph, frame_duration: ti
                 break
             }
         }
+        
+        apply_forces(sg)
+        
         // clear_input_manager(sg.InputManager)
         // update cameras after systems run so they can react to system-triggered events
         update_cameras(sg)

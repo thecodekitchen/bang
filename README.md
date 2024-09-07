@@ -84,7 +84,8 @@ danger_boy :: proc(nilly:^string) -> (^string, b.Error) {
 }
 
 main :: proc() {
-    nilly, err := danger_boy(nil)
+    bad: ^string = nil
+    nilly, err := danger_boy(bad)
     if !b.ok(err) {
         b.debug_log("danger boy failed!")
         return

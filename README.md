@@ -99,13 +99,10 @@ Odin provides more robust stack tracing natively, but I like the way this levera
 
 ## Project Trajectory
 
-My plan is to keep working on this in my spare time for the forseeable future, and I'd love to start building a core team around it, but my intention is to keep it entirely open source. Odin is a really cool language, and I would really like to help grow its ecosystem.
-
-Future plans include:
+In all honesty, I've been forced to move on to other projects for the moment, but the logical next steps from here would include:
 
 - Physics engine
 - More advanced shaders
 - Full GUI editor
-- A lot more I haven't thought of yet
-
-Contributions and/or suggestions are massively appreciated as I have a lot to learn in this arena!
+  
+Contributions and/or suggestions are massively appreciated as I have a lot to learn in this arena, but it has been a very instructive journey so far.

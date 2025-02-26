@@ -2,7 +2,7 @@
 
 A developing game engine written in Odin mostly.
 
-It's still quite early days, but I've dug into it as my primary spare time project and would welcome thoughtful contributions.
+It's still quite early days, but I would welcome thoughtful contributions.
 
 I'm using GLFW with OpenGL for rendering. Supporting other rendering backends is of interest to me long term, but I haven't had time to explore it yet.
 
